@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios en línea- Consultar Certificados</title>
+    
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            background: url('fondo.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-group {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .header-image {
+            width: 100%;
+            max-height: 280px;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .top-menu {
+            background: #dbdada;
+            padding: 14px 0;
+            border-bottom: 4px solid #002b5e;
+        }
+        .menu-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;          
+            background: transparent;
+            color: #003087;              
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.92rem;          
+            transition: all 0.3s;
+            white-space: nowrap;
+            border: 2px solid transparent;
+        }
+        .nav-btn:hover {
+            background: #003087;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px auto 30px auto;
+            padding: 0 20px;
+            flex: 1; 
+        }
+
+        /* BARRA DE NAVEGACIÓN SUPERIOR (MIGAS DE PAN) */
+        .breadcrumb-bar {
+            background: rgba(0, 43, 94, 0.85); 
+            padding: 12px 25px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .breadcrumb-separator {
+            color: #ffffff;
+            opacity: 0.7;
+        }
+
+        .breadcrumb-current {
+            color: #ffffff;
+            opacity: 0.9;
+        }
+
+        /* CAPA SEMITRANSPARENTE PARA OSCURECER EL FONDO DE ATRÁS */
+        .backdrop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); 
+            z-index: 9999; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ====================================================
+           VENTANA DE INFORMACIONES COMPLETA DE ARRIBA A ABAJO
+           ==================================================== */
+        .info-results-box {
+            width: 95%;
+            max-width: 820px;
+            height: 100vh; /* Ocupa todo el alto de la pantalla */
+            background: #ffffff;
+            border-left: 1px solid #dcdcdc;
+            border-right: 1px solid #dcdcdc;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .success-banner {
+            background-color: #e2efe2; 
+            border-bottom: 1px solid #a2cba2; 
+            color: #2b512b;
+            padding: 20px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            flex-shrink: 0; /* Evita que el banner se encoja */
+        }
+
+        .success-banner p {
+            margin-bottom: 6px;
+        }
+        .success-banner p:last-child {
+            margin-bottom: 0;
+        }
+
+        .results-body {
+            display: flex;
+            padding: 25px;
+            gap: 25px;
+            background: white;
+            flex: 1;
+            overflow-y: auto; /* Permite scroll interno si el contenido es alto */
+        }
+
+        .results-table-side {
+            flex: 1.3;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .results-table tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table td {
+            padding: 11px 12px;
+        }
+
+        .results-table td.label-cell {
+            background-color: #004799;
+            color: white;
+            font-weight: bold;
+            width: 40%;
+        }
+
+        .results-table tr:nth-child(even) td.value-cell {
+            background-color: #f7f9fa;
+        }
+        
+        .results-table tr:nth-child(odd) td.value-cell {
+            background-color: #ffffff;
+        }
+
+        .results-photo-side {
+            flex: 0.7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-left: 1px dashed #cccccc;
+            padding-left: 20px;
+            padding-top: 10px;
+        }
+
+        .user-photo {
+            width: 145px;
+            height: 180px;
+            object-fit: cover;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-cerrar-info {
+            background: #ffffff;
+            color: #0056b3;
+            border: 1.5px solid #0056b3;
+            padding: 9px 28px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-cerrar-info:hover {
+            background: #f0f4f9;
+        }
+
+        /* AREA PRINCIPAL DE CONSULTA */
+        .workspace-white-bg {
+            background: #ffffff;
+            border-radius: 24px 24px 0 0;
+            padding: 40px 35px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+            border: 1px solid #e3e8ec;
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-size: 1.4rem; 
+            color: #004b93;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .btn-instructivo {
+            background: #ffffff;
+            color: #0056b3;
+            border: 2px solid #0056b3;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .unified-card {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .form-section {
+            flex: 1.4;
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px 16px 0 0;
+            border: 1.5px solid #dbe3eb;
+            padding: 35px 30px 20px 30px;
+        }
+        
+        .form-group { 
+            display: flex;
+            align-items: center;
+            margin-bottom: 22px; 
+        }
+        
+        label {
+            width: 40%;
+            font-weight: bold;
+            color: #333333;
+            font-size: 0.92rem;
+            padding-right: 15px;
+        }
+        
+        input {
+            width: 60%;
+            padding: 9px 12px;
+            border: 2px solid #0056b3;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 25px;
+            margin-top: 20px;
+            padding-left: 40%;
+        }
+
+        .btn-consultar {
+            background: #ffffff;
+            color: #0056b3;
+            border: 2px solid #0056b3;
+            padding: 8px 28px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-consultar:hover {
+            background: #0056b3;
+            color: white;
+        }
+
+        .captcha-mock {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9f9f9;
+            border: 1px solid #d3d3d3;
+            border-radius: 3px;
+            padding: 10px 12px;
+            width: 250px;
+            height: 70px;
+        }
+
+        .captcha-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .captcha-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #c1c1c1;
+            background: #ffffff;
+        }
+
+        .captcha-text {
+            font-size: 0.8rem;
+        }
+
+        .captcha-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .captcha-logo {
+            width: 28px;
+            height: 28px;
+            background: url('https://www.gstatic.com/recaptcha/api2/logo_48.png') no-repeat center;
+            background-size: contain;
+        }
+
+        .captcha-policy-text {
+            font-size: 0.5rem;
+            color: #555555;
+            text-align: center;
+        }
+
+        .card-base-bar {
+            background-color: #004785;
+            border-radius: 0 0 16px 16px;
+            padding: 12px 25px;
+        }
+
+        .btn-campos-obligatorios {
+            background: #ffffff;
+            color: #004b93;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .btn-campos-obligatorios span {
+            color: #d93025;
+        }
+
+        .right-panel {
+            flex: 0.8;
+            text-align: center;
+        }
+
+        .certificado-img {
+            max-width: 100%;
+            width: 350px;
+            height: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .bottom-background-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bottom-background-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        @media (max-width: 950px) {
+            .unified-card, .results-body {
+                flex-direction: column;
+            }
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            label, input {
+                width: 100%;
+            }
+            .actions-row {
+                padding-left: 0;
+                justify-content: space-between;
+            }
+            .results-photo-side {
+                border-left: none;
+                border-top: 1px dashed #cccccc;
+                padding-left: 0;
+                padding-top: 20px;
+            }
+            .info-results-box {
+                height: 100vh;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="backdrop-overlay" id="backdropOverlay">
+        <div class="info-results-box" id="infoResultsBox">
+            <div class="success-banner">
+                <p><strong><i class="fas fa-check-circle" style="color: #2e7d32;"></i> Certificamos</strong> que en el sistema de información de este Ministerio Público NO EXISTEN ANTECEDENTES PENALES a nombre de JULIO JUNIOR MORILLO LOPEZ , Cédula de Identidad y Electoral Número 40234655112, por lo que se expide la presente Certificación.</p>
+                <p>La presente certificación se expide, firma y sella digitalmente a solicitud de la parte interesada, el día dos (2) del mes junio (6) del año dos mil veinte y seis (2026).</p>
+            </div>
+            
+            <div class="results-body">
+                <div class="results-table-side">
+                    <table class="results-table">
+                        <tr>
+                            <td class="label-cell">Cédula/Pasaporte del solicitante:</td>
+                            <td class="value-cell">40221581289</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Código CIS:</td>
+                            <td class="value-cell">002-7424-7364813-2</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Nombre del solicitante:</td>
+                            <td class="value-cell">JESUS ALBERTO CARMONA REYNOSO</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Centro de emisión:</td>
+                            <td class="value-cell">Online</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">País del centro de emisión:</td>
+                            <td class="value-cell">República Dominicana</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Fecha de emisión:</td>
+                            <td class="value-cell">02/06/2026</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Firma Autorizada:</td>
+                            <td class="value-cell">WENDY MARIA ESTRELLA MONSANTO</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Código de Firma Digital:</td>
+                            <td class="value-cell">CJHH-FD6B-09A2-RLV0-0BCM-19CP</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Resultado de Solicitud:</td>
+                            <td class="value-cell">No existen antecedentes penales</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">Estatus del Proceso:</td>
+                            <td class="value-cell">TERMINADO</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="results-photo-side">
+                    <img src="foto.jpg" alt="Foto del Solicitante" class="user-photo">
+                    <button class="btn-cerrar-info" id="btnCerrarInfo">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-group">
+        <img src="IMAGEN.jpg" alt="Portal Consultar Certificaciones" class="header-image">
+        <div class="top-menu">
+            <div class="menu-container">
+                <div class="nav-buttons">
+                    <a href="#" class="nav-btn"><i class="fas fa-home"></i> Inicio</a>
+                    <a href="#" class="nav-btn">Nosotros</a>
+                    <a href="#" class="nav-btn">Requisitos y tarifas</a>
+                    <a href="#" class="nav-btn">Quejas y sugerencias</a>
+                    <a href="#" class="nav-btn">Denuncias</a>
+                    <a href="#" class="nav-btn">Atención a víctimas</a>
+                    <a href="#" class="nav-btn">Iniciar sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        
+        <div class="breadcrumb-bar">
+            <a href="#" class="breadcrumb-link"><i class="fas fa-home"></i> Inicio</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Consultas /</span>
+        </div>
+        
+        <div class="workspace-white-bg">
+            <div class="workspace-header">
+                <h2 class="title">CONSULTAR CERTIFICACIONES</h2>
+                <a href="#" class="btn-instructivo"><i class="fas fa-info-circle"></i> Instructivo</a>
+            </div>
+
+            <div class="unified-card">
+                <div style="flex: 1.4; display: flex; flex-direction: column;">
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label><span style="color:#d93025;">*</span> Cédula / Pasaporte</label>
+                            <input type="text" placeholder="40221581289">
+                        </div>
+                        <div class="form-group">
+                            <label><span style="color:#d93025;">*</span> Código de Identificación de Servicios (CIS)</label>
+                            <input type="text" placeholder="002-7424-7364813-2">
+                        </div>
+                        <div class="form-group">
+                            <label>Código de Firma Digital</label>
+                            <input type="text" value="JFG2-FHE3-09A2-84T3-0BC2-14TP" readonly>
+                        </div>
+
+                        <div class="actions-row">
+                            <button id="btnConsultar" class="btn-consultar">
+                                <i class="fas fa-search"></i> Consultar
+                            </button>
+                            
+                            <div class="captcha-mock">
+                                <div class="captcha-left">
+                                    <div class="captcha-checkbox"></div>
+                                    <div class="captcha-text">No soy un robot</div>
+                                </div>
+                                <div class="captcha-right">
+                                    <div class="captcha-logo"></div>
+                                    <div class="captcha-policy-text">reCAPTCHA<br>Privacidad - Condiciones</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-base-bar">
+                        <button class="btn-campos-obligatorios">
+                            <span>*</span> Campos obligatorios
+                        </button>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <img src="CERTIFICADO.jpg" alt="Certificado Digital" class="certificado-img">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-background-container">
+        <img src="imagen3.jpg" alt="Fondo Superior Inferior" class="bottom-background-image">
+        <img src="IMAGEN2.jpg" alt="Fondo Inferior" class="bottom-background-image">
+    </div>
+
+    <script>
+        // Lógica para cerrar la ventana y ocultar la capa semitransparente de fondo
+        document.getElementById('btnCerrarInfo').addEventListener('click', function() {
+            document.getElementById('backdropOverlay').style.display = 'none';
+        });
+
+        // Al consultar, vuelve a desplegarse la capa semitransparente junto a las informaciones
+        document.getElementById('btnConsultar').addEventListener('click', function() {
+            const btn = this;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Consultando...`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fas fa-search"></i> Consultar`;
+                document.getElementById('backdropOverlay').style.display = 'flex';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
